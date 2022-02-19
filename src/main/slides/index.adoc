@@ -1,0 +1,131 @@
+= Performance: Beyond the event horizon
+:idprefix:
+:stem: asciimath
+:backend: html
+:source-highlighter: highlightjs
+:highlightjs-style: github
+:revealjs_history: true
+:revealjs_theme: night
+:revealjs_controls: false
+:revealjs_width: 1920
+:revealjs_height: 1080
+:imagesdir: images
+:customcss: css/custom.css
+:mmdc: /home/jarek/node_modules/.bin/mmdc
+
+== Jarosław Pałka
+
+staff engineer/team lead/benchmarking team at Neo4j (a graph database)
+
+over 20 years with JVM, +
+since early days of no native threads and, +
+no JIT and slow as hell GC
+
+speaker, coder, architect
+
+founder of SegFault conference +
+godfather of Programistyczna Grupa Rozwoju
+
+=== !
+
+if you don't believe climate crisis is real +
+and caused by humans +
+you will not like this presentation
+
+you can stay and accept consequences +
+or you can leave, it is your choice
+
+=== !
+
+I cannot take responsibility for your feelings +
+(this is what I call freedom, a freedom to ignore your feelings)
+
+=== !
+
+image::https://media.nature.com/lw800/magazine-assets/d41586-018-06610-y/d41586-018-06610-y_16109962.png[]
+
+=== change my mind
+
+== !
+
+image::https://media.giphy.com/media/5gyQvw0weMJXMCJTw8/giphy.gif[background]
+
+
+=== !
+
+every performance problem can be solved by throwing more hardware +
+(until there is no more hardware, or it doesn't scale anymoreimage)
+
+=== hey, clouds
+
+image::https://media.giphy.com/media/l41lQIclE3lItAlfq/giphy.gif[background]
+
+=== illusion
+
+it creates this illusion of infinite resources,
+
+=== until the moment you log into billing console
+
+image::https://media.giphy.com/media/1GT5PZLjMwYBW/giphy.gif[background]
+
+== the lost of art of finding bottlenecks
+
+performance becomes a thing we should all care about
+
+=== let me put some light on the problem
+
+=== !
+
+we are living in a world of scarce resources
+
+there is only X CPU instructions per cycle +
+there is only X IOPS +
+there is only X GB/s memory bus throughput
+
+
+=== thesis
+
+all performance problems are caused by lack of resources
+
+=== !
+
+you performance problems are either
+
+* CPU bound
+* "memory wall"
+* IOPS bound
+* network throughput bound
+
+=== !
+
+[mermaid, height=800, theme=dark]
+....
+flowchart TD
+CPU --> memory
+memory --> disk
+memory --> network
+....
+
+=== !
+
+all performance problems are caused by lack of resources
+
+=== I lied
+
+image::https://media.giphy.com/media/qwetfXgpXMdWM/giphy.gif[background]
+
+=== contention
+
+all performance problems +
+are either caused  by +
+lack of resources +
+or resources shared between processes
+
+== the box
+
+== USE
+
+
+== benchmarking
+
+== continous profiling
