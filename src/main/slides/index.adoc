@@ -11,6 +11,7 @@
 :revealjs_height: 1080
 :imagesdir: images
 :customcss: css/custom.css
+:title-slide-background-image: pexels-pixabay-268533.jpg
 :mmdc: /home/jarek/node_modules/.bin/mmdc
 
 == Jarosław Pałka
@@ -54,7 +55,7 @@ image::https://media.giphy.com/media/5gyQvw0weMJXMCJTw8/giphy.gif[background]
 === !
 
 every performance problem can be solved by throwing more hardware +
-(until there is no more hardware, or it doesn't scale anymoreimage)
+(until there is no more hardware, or it doesn't scale anymore)
 
 === hey, clouds
 
@@ -121,10 +122,30 @@ are either caused  by +
 lack of resources +
 or resources shared between processes
 
-== the box
+=== !
+
+what if would have simple set of rules +
+(aka heuristics) +
+that would help us navigate in this crazy world?
+
+=== ! follow the rules
+
+=== start from CPU
+
+=== developer deploying new version during outage
+
+image::https://media.giphy.com/media/bP0y34GHtOzp6/giphy.gif[background]
+
+=== !
+
+trust your instincts
+
+* check system load
+* CPU usage chart
 
 == USE
 
+== the box
 
 == benchmarking
 
