@@ -69,28 +69,40 @@ it creates this illusion of infinite resources,
 
 image::https://media.giphy.com/media/1GT5PZLjMwYBW/giphy.gif[background]
 
-== the lost of art of finding bottlenecks
+
+== !
 
 performance becomes a thing we should all care about
 
-=== let me put some light on the problem
+// TODO inverter pyramid (features, maintainability, performance)
+
+== the lost of art of finding bottlenecks
+
+99% (I made it up) +
+of time spent when dealing +
+with performance problems +
+is to find a source of it
+
+=== bottlenecks hidding in code
+
+image::https://media.giphy.com/media/mpaLG4YIVuXF6/giphy.gif[background]
 
 === !
 
 we are living in a world of scarce resources
 
-there is only X CPU instructions per cycle +
-there is only X IOPS +
+there are only X CPU instructions per cycle +
+there are only X IOPS +
 there is only X GB/s memory bus throughput
 
 
 === thesis
 
-all performance problems are caused by lack of resources
+all performance problems are caused by a lack of resources
 
 === !
 
-you performance problems are either
+performance problems are either
 
 * CPU bound
 * "memory wall"
@@ -109,7 +121,7 @@ memory --> network
 
 === !
 
-all performance problems are caused by lack of resources
+all performance problems are caused by a lack of resources
 
 === I lied
 
@@ -118,13 +130,13 @@ image::https://media.giphy.com/media/qwetfXgpXMdWM/giphy.gif[background]
 === contention
 
 all performance problems +
-are either caused  by +
-lack of resources +
+are either caused by +
+a lack of resources +
 or resources shared between processes
 
 === !
 
-what if would have simple set of rules +
+what if would have a simple set of rules +
 (aka heuristics) +
 that would help us navigate in this crazy world?
 
@@ -132,21 +144,213 @@ that would help us navigate in this crazy world?
 
 === start from CPU
 
-=== developer deploying new version during outage
+....
+flowchart TD
+CPU --> memory
+memory --> disk
+memory --> network
+....
+
+=== developer deploying new version during an outage
 
 image::https://media.giphy.com/media/bP0y34GHtOzp6/giphy.gif[background]
 
 === !
 
-trust your instincts
+[mermaid,height=980]
+....
+graph TD
+    A[uptime] --> B{Is load average high?}
+    B --> |Yes| C(top)
+    B --> |No| HOSTNAME[hostname]
+    HOSTNAME --> WRONG_HOSTNAME{Are you on correct machine?}
+    WRONG_HOSTNAME -->|No| DONE 
+    C --> CPU_BUSY{What keeps your CPU busy?}
+    CPU_BUSY -->|usr| CPU_USR[Things are wrong in user space]
+    CPU_BUSY -->|sys| G[Things are wrong in kernel]
+    CPU_BUSY -->|wait| CPU_WAIT[Things are busy in I/O]
+    CPU_BUSY -->|idle| CPU_IDLE
+    G --> J[dmesg]
+    J --> I{Do we see any errors}
+    I -->|Yes| DONE((You are done here))
+    I --> |No| SYSDIG[# slow system calls <br/>sysdig -c topscalls<br/>sysdig -c bottlenecks<br/>sysdig -c scallslower]
+    SYSDIG --> SYSCALLS[Go study syscalls]
+    SYSCALLS --> DONE
+    CPU_WAIT --> CPU_WAIT_IOSTAT[iostat -x]
+    CPU_WAIT --> CPU_WAIT_VMSTAT[vmstat]
+    CPU_WAIT_VMSTAT --> CACHES_BUFFERS{Are caches/buffers healthy?}
+    CPU_USR --> PIDSTAT[# are you busy reading from disk <br/> pidstat -h -d -t -p pid]
+    CPU_USR --> PIDSTAT_CONTEXT_SWITCH[# are you busy context switching <br/> pidtstat -h -w -t -p pid]
+    CPU_USR --> PIDSTAT_PAGE_FAULTS[# are busy with page faults <br/> pidtstat -h -r -t -p pid]
+    CPU_IDLE --> MEMORY_WALL[# check CPU caches and IPC <br/> perf]
+    CPU_IDLE --> LOCK[What?]
+    CACHES_BUFFERS -->|No| WHO_ATE_RAM[#who ate ram <br/> pidstat -h -r]
+....       
 
-* check system load
-* CPU usage chart
+=== WARNING!
+
+above heuristic is collective collection of my experience, articles and books I read and people I worked with, the mileage may vary
+
+== a different perspective
+
+=== world is a queue
+
+=== !
+
+the world we live in is a huge network of queues,
+
+if you take this perspective on systems, +
+we could come up with a different +
+set of heuristics
 
 == USE
 
+**U**tilization **S**aturation **E**rrors
+
+described by one the only Brendan Gregg in https://www.brendangregg.com/usemethod.html[The USE method]
+
+I could actually copy paste here his article :) +
+(this is what I am going to do anyway)
+
+=== a sip of theory
+
+image::https://media.giphy.com/media/l5Dgth3SiNj14FzLD2/giphy.gif[background]
+
+[.white.background]
+=== !
+
+image::https://upload.wikimedia.org/wikipedia/commons/6/65/Mm1_queue.svg[width=900]
+
+=== !
+
+[quote,,Brendan Greg]
+    For every resource, check utilization, saturation, and errors.
+
+=== !
+
+* resource: all physical server functional components (CPUs, disks, buses, ...) 
+* utilization: the average time that the resource was busy servicing work
+* saturation: the degree to which the resource has extra work which it can't service, often queued
+* errors: the count of error events
+
+=== Does Low Utilization Mean No Saturation?
+
+[quote,,Brendan Greg]
+    A burst of high utilization can cause saturation and performance issues, even though utilization is low when averaged over a long interval. This may be counter-intuitive!
+    I had an example where a customer had problems with CPU saturation (latency) even though their monitoring tools showed CPU utilization was never higher than 80%. The monitoring tool was reporting five minute averages, during which CPU utilization hit 100% for seconds at a time.
+
+=== !
+
+[quote,,Brendan Greg]
+    Some components are two types of resources: storage devices are a service request resource (I/O) and also a capacity resource (population). Both types can become a system bottleneck. Request resources can be defined as queueing systems, which can queue and then service requests.
+
+=== !
+
+image::https://www.brendangregg.com/USEmethod/usemethod_flow.png[]
+
+=== Interconnects
+
+[quote,,Brendan Greg]
+    CPU, memory and I/O interconnects are often overlooked. Fortunately, they aren't commonly the system bottleneck. Unfortunately, if they are, it can be difficult to do much about (maybe you can upgrade the main board, or reduce load: eg, "zero copy" projects lighten memory bus load). With the USE Method, at least you become aware of what you weren't considering: interconnect performance.
+
+=== Software Resources
+
+* mutex locks: utilization may be defined as the time the lock was held; saturation by those threads queued waiting on the lock.
+* thread pools: utilization may be defined as the time threads were busy processing work; saturation by the number of requests waiting to be serviced by the thread pool.
+* process/thread capacity: the system may have a limited number of processes or threads, the current usage of which may be defined as utilization; waiting on allocation may be saturation; and errors are when the allocation failed (eg, "cannot fork").
+* file descriptor capacity: similar to the above, but for file descriptors.
+
+=== that leads us to next chapter
+
+image::https://media.giphy.com/media/1TgECF0mNVirC/giphy.gif[background]
+
 == the box
+
+https://www.infoq.com/articles/the-box/[The Box: A Shortcut to finding Performance Bottlenecks, Kirk Pepperdine]
+
+=== systems have layers
+
+image::https://media.giphy.com/media/JMfzwxEIbd6zC/giphy.gif[background]
+
+=== the box
+
+image::https://imgopt.infoq.com/fit-in/1200x2400/filters:no_upscale()/articles/the-box/en/resources/image1.jpg[]
+
+=== when sh.t hits the fan
+
+=== people
+
+[quote,,Kirk Pepperdine]
+    What this is saying is that performance bottlenecks are sensitive to the load that is put on the system. If we change a layer in the box we will end up with a  different system so it is consistent that the box includes People. 
+
+=== !
+
+change in one layer will impact other layers, +
+either by 
+
+=== !
+
+[quote,,Kirk Pepperdine]
+    Having People layer represent people isn't enough. 
+    People also represent anything that drives our system including batch processes and other systems. These all put demands on the other layers in the system, that in turn consume the scarce resources they provide.
+
+=== !
+
+[quote,,Kirk Pepperdine]
+    The list of things we need to know in order to create a good simulation includes, the number of users, what they are doing, how often they are doing it, and when they are doing it. We also need to consider scenarios such as; beginning and end of shift activities, seasonal trends, special events, the ever present 2 am backup activity.
+
+
+=== Application
+
+[quote,,Kirk Pepperdine]
+     ignore the code until after you've looked at the lower layers of the box. Even then you're foray into the code should use a profiler as a guide.
+
+=== WAT?
+
+this feels counter-intuitive, +
+we eat, breath, drink, defecate code
+
+unless you have continous profiling enabled on production, + 
+you will get lost in line of code, assumption, unknowns
+
+=== JVM (aka runtime)
+
+original article was target for Java, +
+but we can replace JVM with any runtime, +
+be it .NET, k8s, you name it
+
+=== !
+
+=== hardware
+
+this is a layer which has limited capacity +
+
+=== !
+
+one important question you need ask then digging through layers is +
+
+what has changed?
+
+=== !
+
+more users? +
+new release? +
+runtime configuration changes?
+
+== metrics
 
 == benchmarking
 
-== continous profiling
+== continuous profiling
+
+== takeaways
+
+=== DON'T PANIC
+
+=== SHARPEN YOUR TOOLS
+
+=== BE AFRAID OF THE DARK
+
+=== IT'S ALWAYS FUNNY UNTIL NOBODY GETS HURT
+
+== the end
