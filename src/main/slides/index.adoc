@@ -111,7 +111,7 @@ performance problems are either
 
 === !
 
-[mermaid, height=800, theme=dark]
+[mermaid, height=1020]
 ....
 flowchart TD
 CPU --> memory
@@ -132,7 +132,7 @@ image::https://media.giphy.com/media/qwetfXgpXMdWM/giphy.gif[background]
 all performance problems +
 are either caused by +
 a lack of resources +
-or resources shared between processes
+*or resources shared between processes*
 
 === !
 
@@ -140,10 +140,9 @@ what if would have a simple set of rules +
 (aka heuristics) +
 that would help us navigate in this crazy world?
 
-=== ! follow the rules
+== start from CPU
 
-=== start from CPU
-
+[mermaid, height=900]
 ....
 flowchart TD
 CPU --> memory
@@ -151,6 +150,7 @@ memory --> disk
 memory --> network
 ....
 
+[role="highlight_section_title"]
 === developer deploying new version during an outage
 
 image::https://media.giphy.com/media/bP0y34GHtOzp6/giphy.gif[background]
@@ -181,25 +181,31 @@ graph TD
     CPU_WAIT_VMSTAT --> CACHES_BUFFERS{Are caches/buffers healthy?}
     CPU_USR --> PIDSTAT[# are you busy reading from disk <br/> pidstat -h -d -t -p pid]
     CPU_USR --> PIDSTAT_CONTEXT_SWITCH[# are you busy context switching <br/> pidtstat -h -w -t -p pid]
-    CPU_USR --> PIDSTAT_PAGE_FAULTS[# are busy with page faults <br/> pidtstat -h -r -t -p pid]
+    CPU_USR --> PIDSTAT_PAGE_FAULTS[# are you busy with page faults <br/> pidtstat -h -r -t -p pid]
     CPU_IDLE --> MEMORY_WALL[# check CPU caches and IPC <br/> perf]
-    CPU_IDLE --> LOCK[What?]
+    CPU_IDLE --> LOCK[Deadlock?]
     CACHES_BUFFERS -->|No| WHO_ATE_RAM[#who ate ram <br/> pidstat -h -r]
 ....       
 
 === WARNING!
 
-above heuristic is collective collection of my experience, articles and books I read and people I worked with, the mileage may vary
+above heuristic is the collection of my experience, +
+articles and books I read +
+and people I worked with, +
+your the mileage may vary
 
 == a different perspective
 
+[role="highlight_section_title"]
 === world is a queue
+
+image::https://media.giphy.com/media/5YuhLwDgrgtRVwI7OY/giphy.gif[background]
 
 === !
 
 the world we live in is a huge network of queues,
 
-if you take this perspective on systems, +
+if we take this perspective on systems, +
 we could come up with a different +
 set of heuristics
 
@@ -212,6 +218,7 @@ described by one the only Brendan Gregg in https://www.brendangregg.com/usemetho
 I could actually copy paste here his article :) +
 (this is what I am going to do anyway)
 
+[role="highlight_section_title"]
 === a sip of theory
 
 image::https://media.giphy.com/media/l5Dgth3SiNj14FzLD2/giphy.gif[background]
@@ -260,6 +267,7 @@ image::https://www.brendangregg.com/USEmethod/usemethod_flow.png[]
 * process/thread capacity: the system may have a limited number of processes or threads, the current usage of which may be defined as utilization; waiting on allocation may be saturation; and errors are when the allocation failed (eg, "cannot fork").
 * file descriptor capacity: similar to the above, but for file descriptors.
 
+[role="highlight_section_title"]
 === that leads us to next chapter
 
 image::https://media.giphy.com/media/1TgECF0mNVirC/giphy.gif[background]
@@ -268,6 +276,7 @@ image::https://media.giphy.com/media/1TgECF0mNVirC/giphy.gif[background]
 
 https://www.infoq.com/articles/the-box/[The Box: A Shortcut to finding Performance Bottlenecks, Kirk Pepperdine]
 
+[role="highlight_section_title"]
 === systems have layers
 
 image::https://media.giphy.com/media/JMfzwxEIbd6zC/giphy.gif[background]
@@ -286,7 +295,8 @@ image::https://imgopt.infoq.com/fit-in/1200x2400/filters:no_upscale()/articles/t
 === !
 
 change in one layer will impact other layers, +
-either by 
+either by requesting more resources +
+or by causing higher contention
 
 === !
 
@@ -305,29 +315,62 @@ either by
 [quote,,Kirk Pepperdine]
      ignore the code until after you've looked at the lower layers of the box. Even then you're foray into the code should use a profiler as a guide.
 
+[role="highlight_section_title"]
+=== ignore the code
+
+image::https://media.giphy.com/media/V4NSR1NG2p0KeJJyr5/giphy.gif[background]
+
 === WAT?
 
 this feels counter-intuitive, +
 we eat, breath, drink, defecate code
 
-unless you have continous profiling enabled on production, + 
-you will get lost in line of code, assumption, unknowns
+unless you have continuous profiling enabled on production, + 
+you will get lost in +
+lines of code, +
+assumptions, +
+unknowns
 
 === JVM (aka runtime)
 
-original article was target for Java, +
+the original article was targeted to Java developers, +
 but we can replace JVM with any runtime, +
-be it .NET, k8s, you name it
+be it .NET, k8s +
+you name it
 
 === !
+
+understand how your runtime maps to hardware resources
+
+threads to CPU cores +
+your high-level code to CPU instructions +
+your data structures to CPU cache sizes +
+your I/O operations to page sizes +
+your method sizes to context switches
+
+[role="highlight_section_title"]
+=== huston we have a problem
+
+image::https://media.giphy.com/media/5ndfKr0Nv92LkWrKpU/giphy.gif[background]
 
 === hardware
 
-this is a layer which has limited capacity +
+layer with limited resources +
+
+=== it is complicated
+
+[role="highlight_section_title"]
+we can either add more resources +
+or optimize usage of those in our code
+
+[role="highlight_section_title"]
+=== moar cores
+
+image::https://media.giphy.com/media/FHlMJHSx5sGBi/giphy.gif[background]
 
 === !
 
-one important question you need ask then digging through layers is +
+an important question you need to ask when digging through layers is +
 
 what has changed?
 
@@ -337,20 +380,53 @@ more users? +
 new release? +
 runtime configuration changes?
 
-== metrics
-
-== benchmarking
-
-== continuous profiling
-
 == takeaways
 
-=== DON'T PANIC
+[role="highlight_section_title"]
+== DON'T PANIC
 
-=== SHARPEN YOUR TOOLS
+image::https://media.giphy.com/media/nrXif9YExO9EI/giphy.gif[background]
 
-=== BE AFRAID OF THE DARK
+=== !
 
-=== IT'S ALWAYS FUNNY UNTIL NOBODY GETS HURT
+* be transparent, and call f*ck up a f*ck up
+* keep non-technical people informed, but not involved
+* be transparent, publish all metrics and incident logs
+* implement minimal operating standards
+* have an up to date map of your system (sic!)
 
-== the end
+[role="highlight_section_title"]
+== SHARPEN YOUR TOOLS
+
+image::https://media.giphy.com/media/oE1jws1iDDcvm/giphy-downsized-large.gif[background]
+
+=== !
+
+* observability
+* benchmarking
+* continuous profiling
+
+[role="highlight_section_title"]
+== BE AFRAID OF THE DARK
+
+image::https://media.giphy.com/media/LShzvtC3Ri1oO7TMHT/giphy.gif[background]
+
+=== !
+
+* you don't know everything, it is better to be stupid and fix the problem, then to be wisest man in the room and have low system availability ;)
+* things you don't know you don't know will come and get you in most unexpected ways
+* make sure you have as wide as possible set of skills at your disposal when dealing with incident
+
+[role="highlight_section_title"]
+== IT'S ALWAYS FUNNY UNTIL SOMEBODY GETS HURT
+
+=== !
+
+Are people getting hurt or dying? +
+No? 
+
+Business as usuall 
+
+== !
+
+image::https://media.giphy.com/media/3oEduIT6dW9cBH5ZQc/giphy.gif[background,size=contain]
