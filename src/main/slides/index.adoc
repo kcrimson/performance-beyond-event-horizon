@@ -65,10 +65,10 @@ image::https://media.giphy.com/media/l41lQIclE3lItAlfq/giphy.gif[background]
 
 it creates this illusion of infinite resources,
 
-=== until the moment you log into billing console
+[role="highlight_section_title"]
+=== until the moment you log into a billing console
 
 image::https://media.giphy.com/media/1GT5PZLjMwYBW/giphy.gif[background]
-
 
 == !
 
@@ -76,7 +76,7 @@ performance becomes a thing we should all care about
 
 // TODO inverter pyramid (features, maintainability, performance)
 
-== the lost of art of finding bottlenecks
+== the lost art of finding bottlenecks
 
 99% (I made it up) +
 of time spent when dealing +
