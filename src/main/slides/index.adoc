@@ -34,7 +34,8 @@ and caused by humans +
 you will not like this presentation
 
 you can stay and accept consequences +
-or you can leave, it is your choice
+or you can leave, +
+it is your choice
 
 === !
 
@@ -43,7 +44,7 @@ I cannot take responsibility for your feelings +
 
 === !
 
-image::https://media.nature.com/lw800/magazine-assets/d41586-018-06610-y/d41586-018-06610-y_16109962.png[]
+image::https://media.nature.com/lw800/magazine-assets/d41586-018-06610-y/d41586-018-06610-y_16109962.png[size=contain]
 
 === change my mind
 
@@ -51,6 +52,12 @@ image::https://media.nature.com/lw800/magazine-assets/d41586-018-06610-y/d41586-
 
 image::https://media.giphy.com/media/5gyQvw0weMJXMCJTw8/giphy.gif[background]
 
+
+== !
+
+performance becomes a thing we should all care about
+
+// TODO inverter pyramid (features, maintainability, performance)
 
 === !
 
@@ -63,18 +70,13 @@ image::https://media.giphy.com/media/l41lQIclE3lItAlfq/giphy.gif[background]
 
 === illusion
 
-it creates this illusion of infinite resources,
+it creates this illusion of infinite resources
 
 [role="highlight_section_title"]
 === until the moment you log into a billing console
 
 image::https://media.giphy.com/media/1GT5PZLjMwYBW/giphy.gif[background]
 
-== !
-
-performance becomes a thing we should all care about
-
-// TODO inverter pyramid (features, maintainability, performance)
 
 == the lost art of finding bottlenecks
 
@@ -111,7 +113,7 @@ performance problems are either
 
 === !
 
-[mermaid, height=1020]
+[mermaid, height=1020,format=svg,scale=2]
 ....
 flowchart TD
 CPU --> memory
@@ -142,7 +144,7 @@ that would help us navigate in this crazy world?
 
 == start from CPU
 
-[mermaid, height=900]
+[mermaid, height=900,scale=2]
 ....
 flowchart TD
 CPU --> memory
@@ -157,19 +159,17 @@ image::https://media.giphy.com/media/bP0y34GHtOzp6/giphy.gif[background]
 
 === !
 
-[mermaid,height=980]
+[mermaid,height=980,format=svg,scale=2]
 ....
 graph TD
     A[uptime] --> B{Is load average high?}
     B --> |Yes| C(top)
-    B --> |No| HOSTNAME[hostname]
-    HOSTNAME --> WRONG_HOSTNAME{Are you on correct machine?}
+    B --> |No| CPU_IDLE[CPU is idle]
     WRONG_HOSTNAME -->|No| DONE 
     C --> CPU_BUSY{What keeps your CPU busy?}
     CPU_BUSY -->|usr| CPU_USR[Things are wrong in user space]
     CPU_BUSY -->|sys| G[Things are wrong in kernel]
     CPU_BUSY -->|wait| CPU_WAIT[Things are busy in I/O]
-    CPU_BUSY -->|idle| CPU_IDLE
     G --> J[dmesg]
     J --> I{Do we see any errors}
     I -->|Yes| DONE((You are done here))
@@ -179,11 +179,12 @@ graph TD
     CPU_WAIT --> CPU_WAIT_IOSTAT[iostat -x]
     CPU_WAIT --> CPU_WAIT_VMSTAT[vmstat]
     CPU_WAIT_VMSTAT --> CACHES_BUFFERS{Are caches/buffers healthy?}
-    CPU_USR --> PIDSTAT[# are you busy reading from disk <br/> pidstat -h -d -t -p pid]
+    CPU_WAIT --> PIDSTAT[# are you busy reading from disk <br/> pidstat -h -d -t -p pid]
     CPU_USR --> PIDSTAT_CONTEXT_SWITCH[# are you busy context switching <br/> pidtstat -h -w -t -p pid]
     CPU_USR --> PIDSTAT_PAGE_FAULTS[# are you busy with page faults <br/> pidtstat -h -r -t -p pid]
     CPU_IDLE --> MEMORY_WALL[# check CPU caches and IPC <br/> perf]
     CPU_IDLE --> LOCK[Deadlock?]
+    CPU_IDLE --> WRONG_HOSTNAME[Are you on correct machine?]
     CACHES_BUFFERS -->|No| WHO_ATE_RAM[#who ate ram <br/> pidstat -h -r]
 ....       
 
@@ -193,6 +194,13 @@ above heuristic is the collection of my experience, +
 articles and books I read +
 and people I worked with, +
 your the mileage may vary
+
+
+=== !
+
+https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55[Linux Performance Analysis in 60,000 Milliseconds]
+
+https://netflixtechblog.com/netflix-at-velocity-2015-linux-performance-tools-51964ddb81cf[Netflix at Velocity 2015: Linux Performance Tools]
 
 == a different perspective
 
@@ -420,12 +428,15 @@ image::https://media.giphy.com/media/LShzvtC3Ri1oO7TMHT/giphy.gif[background]
 [role="highlight_section_title"]
 == IT'S ALWAYS FUNNY UNTIL SOMEBODY GETS HURT
 
+image::https://media.giphy.com/media/7SF5scGB2AFrgsXP63/giphy.gif[background]
+
 === !
 
 Are people getting hurt or dying? +
 No? 
 
-Business as usuall 
+Business as usuall aka SNAFU +
+Situation Normal, All Fucked Up
 
 == !
 
