@@ -14,6 +14,19 @@
 :title-slide-background-image: pexels-pixabay-268533.jpg
 :mmdc: /home/jarek/node_modules/.bin/mmdc
 
+
+== !
+
+[quote,Mgła,Age Of Excuse VI]
+What has to be done, has to be done +
+The human nature is what it is +
+We cover our eyes in a call to arms +
+And turn one edge toward ourselves
+
+== Performance: Beyond the event horizon
+
+image::pexels-pixabay-268533.jpg[background]
+
 == Jarosław Pałka
 
 staff engineer/team lead/benchmarking team at Neo4j (a graph database)
@@ -274,6 +287,10 @@ image::https://www.brendangregg.com/USEmethod/usemethod_flow.png[]
 * thread pools: utilization may be defined as the time threads were busy processing work; saturation by the number of requests waiting to be serviced by the thread pool.
 * process/thread capacity: the system may have a limited number of processes or threads, the current usage of which may be defined as utilization; waiting on allocation may be saturation; and errors are when the allocation failed (eg, "cannot fork").
 * file descriptor capacity: similar to the above, but for file descriptors.
+
+=== USE checklist
+
+https://www.brendangregg.com/USEmethod/use-linux.html[]https://www.brendangregg.com/USEmethod/use-linux.html
 
 [role="highlight_section_title"]
 === that leads us to next chapter
