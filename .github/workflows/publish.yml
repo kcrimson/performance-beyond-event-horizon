@@ -9,9 +9,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -25,6 +25,10 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - run: npm install
     - name: Build with Gradle
       uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
       with:

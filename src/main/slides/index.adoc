@@ -12,7 +12,7 @@
 :imagesdir: images
 :customcss: css/custom.css
 :title-slide-background-image: pexels-pixabay-268533.jpg
-:mmdc: /home/jarek/node_modules/.bin/mmdc
+:mmdc: node_modules/.bin/mmdc
 
 
 == !
