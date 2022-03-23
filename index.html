@@ -428,46 +428,13 @@ is to find a source of it</p></div></div></section><section id="bottlenecks_hidd
 <div class="paragraph"><p>there are only X CPU instructions per cycle<br>
 there are only X IOPS<br>
 there is only X GB/s memory bus throughput</p></div></div></section><section id="thesis"><h2>thesis</h2><div class="slide-content"><div class="paragraph"><p>all performance problems are caused by a lack of resources</p></div></div></section><section><div class="slide-content"><div class="paragraph"><p>performance problems are either</p></div>
-<div class="ulist"><ul><li><p>CPU bound</p></li><li><p>"memory wall"</p></li><li><p>IOPS bound</p></li><li><p>network throughput bound</p></li></ul></div></div></section><section><div class="slide-content"><div class="listingblock"><div class="content"><pre>Failed to generate image: Could not find the 'mmdc' executable in PATH; add it to the PATH or specify its location using the 'mmdc' document attribute
-flowchart TD
-CPU --&gt; memory
-memory --&gt; disk
-memory --&gt; network</pre></div></div></div></section><section><div class="slide-content"><div class="paragraph"><p>all performance problems are caused by a lack of resources</p></div></div></section><section id="i_lied" data-background-image="https://media.giphy.com/media/qwetfXgpXMdWM/giphy.gif"><h2>I lied</h2></section><section id="contention"><h2>contention</h2><div class="slide-content"><div class="paragraph"><p>all performance problems<br>
+<div class="ulist"><ul><li><p>CPU bound</p></li><li><p>"memory wall"</p></li><li><p>IOPS bound</p></li><li><p>network throughput bound</p></li></ul></div></div></section><section><div class="slide-content"><div class="imageblock"><img src="images/diag-96e80aa087afaae7f6ce3e21dad321ae.svg" alt="Diagram" height="1020"></div></div></section><section><div class="slide-content"><div class="paragraph"><p>all performance problems are caused by a lack of resources</p></div></div></section><section id="i_lied" data-background-image="https://media.giphy.com/media/qwetfXgpXMdWM/giphy.gif"><h2>I lied</h2></section><section id="contention"><h2>contention</h2><div class="slide-content"><div class="paragraph"><p>all performance problems<br>
 are either caused by<br>
 a lack of resources<br>
 <strong>or resources shared between processes</strong></p></div></div></section><section><div class="slide-content"><div class="paragraph"><p>what if would have a simple set of rules<br>
 (aka heuristics)<br>
 that would help us navigate in this crazy world?</p></div></div></section></section>
-<section><section id="start_from_cpu"><h2>start from CPU</h2><div class="slide-content"><div class="listingblock"><div class="content"><pre>Failed to generate image: Index 1 out of bounds for length 1
-flowchart TD
-CPU --&gt; memory
-memory --&gt; disk
-memory --&gt; network</pre></div></div></div></section><section id="developer_deploying_new_version_during_an_outage" class="highlight_section_title" data-background-image="https://media.giphy.com/media/bP0y34GHtOzp6/giphy.gif"><h2>developer deploying new version during an outage</h2></section><section><div class="slide-content"><div class="listingblock"><div class="content"><pre>Failed to generate image: Index 1 out of bounds for length 1
-graph TD
-    A[uptime] --&gt; B{Is load average high?}
-    B --&gt; |Yes| C(top)
-    B --&gt; |No| CPU_IDLE[CPU is idle]
-    WRONG_HOSTNAME --&gt;|No| DONE
-    C --&gt; CPU_BUSY{What keeps your CPU busy?}
-    CPU_BUSY --&gt;|usr| CPU_USR[Things are wrong in user space]
-    CPU_BUSY --&gt;|sys| G[Things are wrong in kernel]
-    CPU_BUSY --&gt;|wait| CPU_WAIT[Things are busy in I/O]
-    G --&gt; J[dmesg]
-    J --&gt; I{Do we see any errors}
-    I --&gt;|Yes| DONE((You are done here))
-    I --&gt; |No| SYSDIG[# slow system calls &lt;br/&gt;sysdig -c topscalls&lt;br/&gt;sysdig -c bottlenecks&lt;br/&gt;sysdig -c scallslower]
-    SYSDIG --&gt; SYSCALLS[Go study syscalls]
-    SYSCALLS --&gt; DONE
-    CPU_WAIT --&gt; CPU_WAIT_IOSTAT[iostat -x]
-    CPU_WAIT --&gt; CPU_WAIT_VMSTAT[vmstat]
-    CPU_WAIT_VMSTAT --&gt; CACHES_BUFFERS{Are caches/buffers healthy?}
-    CPU_WAIT --&gt; PIDSTAT[# are you busy reading from disk &lt;br/&gt; pidstat -h -d -t -p pid]
-    CPU_USR --&gt; PIDSTAT_CONTEXT_SWITCH[# are you busy context switching &lt;br/&gt; pidtstat -h -w -t -p pid]
-    CPU_USR --&gt; PIDSTAT_PAGE_FAULTS[# are you busy with page faults &lt;br/&gt; pidtstat -h -r -t -p pid]
-    CPU_IDLE --&gt; MEMORY_WALL[# check CPU caches and IPC &lt;br/&gt; perf]
-    CPU_IDLE --&gt; LOCK[Deadlock?]
-    CPU_IDLE --&gt; WRONG_HOSTNAME[Are you on correct machine?]
-    CACHES_BUFFERS --&gt;|No| WHO_ATE_RAM[#who ate ram &lt;br/&gt; pidstat -h -r]</pre></div></div></div></section><section id="warning"><h2>WARNING!</h2><div class="slide-content"><div class="paragraph"><p>above heuristic is the collection of my experience,<br>
+<section><section id="start_from_cpu"><h2>start from CPU</h2><div class="slide-content"><div class="imageblock"><img src="images/diag-771c6b64228dda98d89a3447269f9dec.png" alt="Diagram" height="900"></div></div></section><section id="developer_deploying_new_version_during_an_outage" class="highlight_section_title" data-background-image="https://media.giphy.com/media/bP0y34GHtOzp6/giphy.gif"><h2>developer deploying new version during an outage</h2></section><section><div class="slide-content"><div class="imageblock"><img src="images/diag-b3780af030f3a787bbba3bae6105228a.svg" alt="Diagram" height="980"></div></div></section><section id="warning"><h2>WARNING!</h2><div class="slide-content"><div class="paragraph"><p>above heuristic is the collection of my experience,<br>
 articles and books I read<br>
 and people I worked with,<br>
 your the mileage may vary</p></div></div></section><section><div class="slide-content"><div class="paragraph"><p><a href="https://netflixtechblog.com/linux-performance-analysis-in-60-000-milliseconds-accc10403c55">Linux Performance Analysis in 60,000 Milliseconds</a></p></div>
